@@ -70,7 +70,10 @@ void throwError(TED::IDTOBase *iface) {
   std::wcstombs(description, &v[0], 1024);
 
   if (rc != EC_INVALID_PARAM) {
-    Nan::ThrowError(description);
+    std::stringstream ss;
+    ss << "Code: " << rc;
+    ss << " " << description;
+    Nan::ThrowError(ss.str().c_str());
     return;
   }
 
