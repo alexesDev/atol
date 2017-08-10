@@ -23,6 +23,7 @@ class Atol : public Nan::ObjectWrap {
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void PrintText(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void PrintFooter(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void OpenCheck(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static Nan::Persistent<v8::Function> constructor;
 
   public:

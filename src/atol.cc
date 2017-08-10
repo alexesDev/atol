@@ -169,6 +169,8 @@ void Atol::Init(v8::Local<v8::Object> exports) {
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("Atol").ToLocalChecked(), tpl->GetFunction());
+
+  exports->Set(Nan::New("ChequeSell").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ChequeSell));
 }
 
 void Atol::PrintText(const Nan::FunctionCallbackInfo<v8::Value>& info) {
@@ -225,5 +227,46 @@ void Atol::PrintFooter(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   if(obj->printer->PrintFooter() < 0) {
     throwError(obj->printer.get());
     return;
+  }
+}
+
+void Atol::OpenCheck(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  auto obj = ObjectWrap::Unwrap<Atol>(info.Holder());
+  auto ifptr = obj->printer.get();
+
+  if (info.Length() != 1) {
+    Nan::ThrowError("Wrong number of arguments (expected 1)");
+    return;
+  }
+
+  if (!info[0]->IsNumber()) {
+    Nan::ThrowError("First argument must be a number");
+    return;
+  }
+
+  if(!obj->printer) {
+    Nan::ThrowError("Invalid interface");
+    return;
+  }
+
+  if(ifptr->put_Mode(TED::Fptr::ModeRegistration) < 0) {
+    throwError(ifptr);
+    return;
+  }
+
+  if(ifptr->SetMode() < 0) {
+    throwError(ifptr);
+    return;
+  }
+
+  auto type = info[0]->Int32Value();
+
+  if(ifptr->put_CheckType(type) < 0) {
+    throwError(ifptr);
+    return;
+  }
+
+  if(ifptr->OpenCheck() < 0) {
+    throwError(ifptr);
   }
 }
