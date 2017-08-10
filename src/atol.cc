@@ -171,6 +171,9 @@ void Atol::Init(v8::Local<v8::Object> exports) {
   exports->Set(Nan::New("Atol").ToLocalChecked(), tpl->GetFunction());
 
   exports->Set(Nan::New("ChequeSell").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ChequeSell));
+
+  exports->Set(Nan::New("ProtocolAtol20").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ProtocolAtol20));
+  exports->Set(Nan::New("ProtocolAtol30").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ProtocolAtol30));
 }
 
 void Atol::PrintText(const Nan::FunctionCallbackInfo<v8::Value>& info) {
