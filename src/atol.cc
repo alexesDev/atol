@@ -184,6 +184,8 @@ void Atol::Init(v8::Local<v8::Object> exports) {
 
   Nan::SetPrototypeMethod(tpl, "printText", PrintText);
   Nan::SetPrototypeMethod(tpl, "printFooter", PrintFooter);
+  Nan::SetPrototypeMethod(tpl, "openCheck", OpenCheck);
+  Nan::SetPrototypeMethod(tpl, "zReport", ZReport);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("Atol").ToLocalChecked(), tpl->GetFunction());
@@ -292,5 +294,35 @@ void Atol::OpenCheck(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
   if(ifptr->OpenCheck() < 0) {
     throwError(ifptr);
+  }
+}
+
+void Atol::ZReport(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  auto obj = ObjectWrap::Unwrap<Atol>(info.Holder());
+  auto ifptr = obj->printer.get();
+
+  if (info.Length() != 0) {
+    Nan::ThrowError("Wrong number of arguments (expected 0)");
+    return;
+  }
+
+  if(ifptr->put_Mode(TED::Fptr::ModeReportClear) < 0) {
+    throwError(ifptr);
+    return;
+  }
+
+  if(ifptr->SetMode() < 0) {
+    throwError(ifptr);
+    return;
+  }
+
+  if(ifptr->put_ReportType(TED::Fptr::ReportZ)) {
+    throwError(ifptr);
+    return;
+  }
+
+  if(ifptr->Report() < 0) {
+    throwError(ifptr);
+    return;
   }
 }
