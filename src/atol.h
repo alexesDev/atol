@@ -17,7 +17,7 @@ typedef std::unique_ptr<TED::Fptr::IFptr, PrinterPtrDeleter> PrinterPtr;
 class Atol : public Nan::ObjectWrap {
   PrinterPtr printer;
 
-  explicit Atol(const char *libPath, const char *tty);
+  explicit Atol(const char *libPath, const char *tty, int model, int protocol);
   ~Atol();
 
   static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);

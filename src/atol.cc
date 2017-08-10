@@ -105,14 +105,14 @@ Nan::Persistent<v8::Function> Atol::constructor;
 
 #define ATOL_SETTING(key, value) if(printer->put_DeviceSingleSetting((key), (value)) < 0) { throwError(printer.get()); return; }
 
-Atol::Atol(const char *libPath, const char *tty) : printer(createPrinterPtr(libPath)) {
+Atol::Atol(const char *libPath, const char *tty, int model, int protocol) : printer(createPrinterPtr(libPath)) {
   wchar_t wideTTY[128];
   mbstowcs(wideTTY, tty, 128);
 
   ATOL_SETTING(S_PORT, SV_PORT_TTY)
   ATOL_SETTING(S_DEVICEFILE, wideTTY)
-  ATOL_SETTING(S_PROTOCOL, TED::Fptr::ProtocolAtol30)
-  ATOL_SETTING(S_MODEL, TED::Fptr::ModelFPrint22NEW)
+  ATOL_SETTING(S_PROTOCOL, protocol)
+  ATOL_SETTING(S_MODEL, model)
   ATOL_SETTING(S_BAUDRATE, 115200)
 
   if(printer->ApplySingleSettings() < 0) {
@@ -139,20 +139,35 @@ void Atol::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     Nan::ThrowError("Cannot call constructor as function, you need to use 'new' keyword");
   }
 
-  if (info.Length() != 2) {
-    Nan::ThrowError("Wrong number of arguments (expected 2)");
+  if (info.Length() != 4) {
+    Nan::ThrowError("Wrong number of arguments (expected 4)");
     return;
   }
 
-  if (!info[0]->IsString() || !info[0]->IsString()) {
-    Nan::ThrowError("All arguments must be a string");
+  if (!info[0]->IsString()) {
+    Nan::ThrowError("(1) arguments must be a string");
+    return;
+  }
+
+  if (!info[1]->IsString()) {
+    Nan::ThrowError("(2) arguments must be a string");
+    return;
+  }
+
+  if (!info[2]->IsNumber()) {
+    Nan::ThrowError("(3) arguments must be a number");
+    return;
+  }
+
+  if (!info[3]->IsNumber()) {
+    Nan::ThrowError("(4) arguments must be a number");
     return;
   }
 
   v8::String::Utf8Value libPath(info[0]->ToString());
   v8::String::Utf8Value tty(info[1]->ToString());
 
-  Atol *obj = new Atol(*libPath, *tty);
+  Atol *obj = new Atol(*libPath, *tty, info[2]->Int32Value(), info[3]->Int32Value());
   obj->Wrap(info.This());
   info.GetReturnValue().Set(info.This());
 }
@@ -174,6 +189,9 @@ void Atol::Init(v8::Local<v8::Object> exports) {
 
   exports->Set(Nan::New("ProtocolAtol20").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ProtocolAtol20));
   exports->Set(Nan::New("ProtocolAtol30").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ProtocolAtol30));
+
+  exports->Set(Nan::New("ModelFPrint22K").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ModelFPrint22K));
+  exports->Set(Nan::New("ModelFPrint22PTK").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::ModelFPrint22NEW));
 }
 
 void Atol::PrintText(const Nan::FunctionCallbackInfo<v8::Value>& info) {

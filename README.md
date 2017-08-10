@@ -8,15 +8,28 @@
 Двайвер поддерживает все кассы от Atol, но тут все жестко на
 FPrint-22ПТК и общение через serial (задано в конструкторе Atol).
 
-# Пример
+## Пример
 
 ```js
 const addon = require('bindings')('addon');
-const kkm = new addon.Atol('./atol/libfptr.so', 'ttyACM0');
+const kkm = new addon.Atol('./atol/libfptr.so', 'ttyACM0', addon.ModelFPrint22PTK, addon.ProtocolAtol30);
 
 kkm.printText("hello from node.js\n\n\n");
 kkm.printFooter();
 ```
+
+## API
+
+### `new Atol(libPath, tty, model, protocol)`
+
+Создаёт основной объект для работы с kkm.
+
+#### Arguments
+
+ - `libPath` (string): путь к libfptr.so
+ - `tty` (string): название устройства (обычно ttyACM0)
+ - `model` (int): `ModelFPrint22K` или `ModelFPrint22PTK` (константы из пакета)
+ - `protocol` (int): `ProtocolAtol20` или `ProtocolAtol30` (константы из пакета)
 
 ## Официальный драйвер
 
