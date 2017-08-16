@@ -25,6 +25,10 @@ class Atol : public Nan::ObjectWrap {
   static void PrintFooter(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void OpenCheck(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static void ZReport(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void RegistrationFZ54(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void Discount(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void Payment(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void CloseCheck(const Nan::FunctionCallbackInfo<v8::Value>& info);
   static Nan::Persistent<v8::Function> constructor;
 
   public:
