@@ -187,9 +187,11 @@ void Atol::Init(v8::Local<v8::Object> exports) {
   Nan::SetPrototypeMethod(tpl, "openCheck", OpenCheck);
   Nan::SetPrototypeMethod(tpl, "zReport", ZReport);
   Nan::SetPrototypeMethod(tpl, "registrationFZ54", RegistrationFZ54);
+  Nan::SetPrototypeMethod(tpl, "registration", Registration);
   Nan::SetPrototypeMethod(tpl, "discount", Discount);
   Nan::SetPrototypeMethod(tpl, "payment", Payment);
   Nan::SetPrototypeMethod(tpl, "closeCheck", CloseCheck);
+  Nan::SetPrototypeMethod(tpl, "cancelCheck", CancelCheck);
 
   constructor.Reset(tpl->GetFunction());
   exports->Set(Nan::New("Atol").ToLocalChecked(), tpl->GetFunction());
@@ -204,6 +206,9 @@ void Atol::Init(v8::Local<v8::Object> exports) {
 
   exports->Set(Nan::New("DiscountSumm").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::DiscountSumm));
   exports->Set(Nan::New("DiscountPercent").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::DiscountPercent));
+
+  exports->Set(Nan::New("OnPosition").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::OnPosition));
+  exports->Set(Nan::New("OnCheck").ToLocalChecked(), Nan::New<v8::Integer>(TED::Fptr::OnCheck));
 }
 
 void Atol::PrintText(const Nan::FunctionCallbackInfo<v8::Value>& info) {
@@ -334,6 +339,54 @@ void Atol::ZReport(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   }
 }
 
+void Atol::Registration(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  auto obj = ObjectWrap::Unwrap<Atol>(info.Holder());
+  auto ifptr = obj->printer.get();
+
+  if (info.Length() != 3) {
+    Nan::ThrowError("Wrong number of arguments (expected 3)");
+    return;
+  }
+
+  if (!info[0]->IsString()) {
+    Nan::ThrowError("First argument must be a string");
+    return;
+  }
+
+  if (!info[1]->IsNumber()) {
+    Nan::ThrowError("Argument 2 must be a number");
+    return;
+  }
+
+  if (!info[2]->IsNumber()) {
+    Nan::ThrowError("Argument 3 must be a number");
+    return;
+  }
+
+  v8::String::Utf8Value nameValue(info[0]->ToString());
+  std::setlocale(LC_ALL, "ru_RU.utf8");
+  std::unique_ptr<wchar_t> name(new wchar_t[nameValue.length() + 1]);
+  mbstowcs(name.get(), *nameValue, nameValue.length());
+
+  auto price = info[1]->NumberValue();
+  auto quantity = info[2]->NumberValue();
+
+  if(ifptr->put_Quantity(quantity) < 0)
+    return throwError(ifptr);
+
+  if(ifptr->put_Price(price) < 0)
+    return throwError(ifptr);
+
+  if(ifptr->put_TextWrap(TED::Fptr::TextWrapWord) < 0)
+    return throwError(ifptr);
+
+  if(ifptr->put_Name(name.get()) < 0)
+    return throwError(ifptr);
+
+  if(ifptr->Registration() < 0)
+    return throwError(ifptr);
+}
+
 void Atol::RegistrationFZ54(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   auto obj = ObjectWrap::Unwrap<Atol>(info.Holder());
   auto ifptr = obj->printer.get();
@@ -413,10 +466,30 @@ void Atol::Discount(const Nan::FunctionCallbackInfo<v8::Value>& info) {
   auto obj = ObjectWrap::Unwrap<Atol>(info.Holder());
   auto ifptr = obj->printer.get();
 
-  if (info.Length() != 3) {
-    Nan::ThrowError("Wrong number of arguments (expected 3)");
-    return;
-  }
+  if (info.Length() != 3)
+    return Nan::ThrowError("Wrong number of arguments (expected 3)");
+
+  if (!info[0]->IsNumber())
+    return Nan::ThrowError("Argument 1 must be a number");
+
+  if (!info[1]->IsNumber())
+    return Nan::ThrowError("Argument 2 must be a number");
+
+  if (!info[2]->IsNumber())
+    return Nan::ThrowError("Argument 3 must be a number");
+
+  auto sum = info[0]->NumberValue();
+  auto type = info[1]->Int32Value();
+  auto destination = info[2]->Int32Value();
+
+  if(ifptr->put_Summ(sum) < 0)
+    return throwError(ifptr);
+  if(ifptr->put_Destination(destination) < 0)
+    return throwError(ifptr);
+  if(ifptr->put_DiscountType(type) < 0)
+    return throwError(ifptr);
+  if(ifptr->Discount() < 0)
+    return throwError(ifptr);
 }
 
 void Atol::Payment(const Nan::FunctionCallbackInfo<v8::Value>& info) {
@@ -449,5 +522,18 @@ void Atol::CloseCheck(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     return throwError(ifptr);
 
   if(ifptr->CloseCheck() < 0)
+    return throwError(ifptr);
+}
+
+void Atol::CancelCheck(const Nan::FunctionCallbackInfo<v8::Value>& info) {
+  auto obj = ObjectWrap::Unwrap<Atol>(info.Holder());
+  auto ifptr = obj->printer.get();
+
+  if (info.Length() != 0) {
+    Nan::ThrowError("Wrong number of arguments (expected 0)");
+    return;
+  }
+
+  if(ifptr->CancelCheck() < 0)
     return throwError(ifptr);
 }
